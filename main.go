@@ -1,14 +1,3 @@
-// True Least Recently Used (LRU) Cache -
-// 1. If an item already exists, we need to remove it and add it to the beginning
-// 2. An order of items is maintained
-// 3. Deletion happens at the tail and addition happens at the head
-
-// | Node 1 | ----------> |   Cache queue   | --------> | Node n |
-// item goes in                                  afte capacity is full
-//                                               last item goes out
-
-// nodes are doubly linked list
-
 package main
 
 import (
@@ -21,49 +10,77 @@ type Node struct {
   next *Node
 }
 
-type Queue struct { // doubly linked list
+type Queue struct {
   head *Node
   tail *Node
+  size int
 }
 
 type Cache struct {
   queue Queue
-  hash Hash // maintains
+  hash map[string]*Node
 }
-
-type Hash map[string]*Node
 
 func NewCache() *Cache {
-  return &Cache{
-    queue: Queue{},
-    hash: Hash{},
+  h := &Node{}
+  t := &Node{}
+  h.next = t
+  t.prev = h
+  q := Queue{
+    head: h,
+    tail: t,
+  }
+  hash := make(map[string]*Node)
+  return &Cache{queue: q, hash: hash}
+}
+
+func (c *Cache) Add(newNode *Node) {
+  tmp := c.queue.head.next
+  c.queue.head.next = newNode
+  newNode.prev = c.queue.head
+  tmp.prev = newNode
+  newNode.next = tmp
+
+  c.hash[newNode.val] = newNode
+
+  c.queue.size++
+}
+
+func (c *Cache) Delete(node *Node) *Node {
+  node.prev.next = node.next
+  node.next.prev = node.prev
+
+  delete(c.hash, node.val)
+  c.queue.size--
+
+  return node
+}
+
+func (c *Cache) Check(str string) {
+  if node, ok := c.hash[str]; ok {
+    tmp := c.Delete(node)
+    c.Add(tmp)
+
+  } else {
+    c.Add(&Node{val: str})
   }
 }
 
-func NewQueue() *Queue {
-  head := &Node{}
-  tail := &Node{}
-
-  head.next = tail
-  tail.prev = head
-
-  return &Queue{
-    head: head,
-    tail: tail,
+func (c Cache) Display() {
+  cur := c.queue.head.next
+  fmt.Printf("%d [", c.queue.size)
+  for cur != c.queue.tail && cur != nil {
+    fmt.Printf("%s <-->", cur.val)
+    cur = cur.next
   }
+  fmt.Println("]")
 }
-
-
-func (c Cache) Check(str string) {
-  node := &Node{}
-}
-
 
 func main() {
-  fmt.Println("start cache")
   cache := NewCache()
-  for _, word := range []string{"rat", "bat", "pete", "stew"}{
-    cache.Check(word)
+  items := []string{"abc", "def", "hij", "klm", "nop", "qrs", "abc", "nop"}
+  for _, item := range items {
+    cache.Check(item)
     cache.Display()
   }
 }
