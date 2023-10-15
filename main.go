@@ -21,6 +21,10 @@ type Cache struct {
   hash map[string]*Node
 }
 
+const (
+  QUEUE_SIZE = 5
+)
+
 func NewCache() *Cache {
   h := &Node{}
   t := &Node{}
@@ -62,6 +66,9 @@ func (c *Cache) Check(str string) {
     c.Add(tmp)
 
   } else {
+    if c.queue.size == QUEUE_SIZE {
+      c.Delete(c.queue.tail.prev)
+    }
     c.Add(&Node{val: str})
   }
 }
