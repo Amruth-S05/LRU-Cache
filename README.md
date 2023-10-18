@@ -1,4 +1,4 @@
-# True Least Recently Used (LRU) Cache -
+# Least Recently Used (LRU) Cache -
 Least Recently Used Cache impletmented with Golang
 
 - 1. If an item already exists, we need to remove it and add it to the beginning
